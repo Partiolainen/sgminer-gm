@@ -1073,8 +1073,9 @@ out:
 
   if (algorithm->type == ALGO_CRYPTONIGHT) {
     size_t GlobalThreads;
-    readbufsize = 76UL;
-		
+
+    readbufsize = 128UL;
+    
     set_threads_hashes(1, clState->compute_shaders, &GlobalThreads, 1, &cgpu->intensity, &cgpu->xintensity, &cgpu->rawintensity, &cgpu->algorithm);
 		
     for (int i = 0; i < 4; ++i) {
