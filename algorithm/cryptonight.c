@@ -22,7 +22,7 @@ static const uint64_t keccakf_rndc[24] =
     0x000000008000808bULL, 0x800000000000008bULL, 0x8000000000008089ULL,
     0x8000000000008003ULL, 0x8000000000008002ULL, 0x8000000000000080ULL, 
     0x000000000000800aULL, 0x800000008000000aULL, 0x8000000080008081ULL,
-    0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL
+    0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL 
 };
 
 static const uint32_t keccakf_rotc[24] = 
@@ -112,8 +112,7 @@ void CNKeccak(uint64_t *output, uint64_t *input, uint32_t Length)
 	uint64_t st[25];
 	
 	// Copy 72 bytes
-	//for(int i = 0; i < 9; ++i) st[i] = input[i];
-	
+  //for(int i = 0; i < 9; ++i) st[i] = input[i];
 	//st[9] = (input[9] & 0x00000000FFFFFFFFUL) | 0x0000000100000000UL;
 	
 	memcpy(st, input, Length);
@@ -131,20 +130,25 @@ void CNKeccak(uint64_t *output, uint64_t *input, uint32_t Length)
 	
 	memcpy(output, st, 200);
 }
-
+#ifdef _MSC_VER
+static inline uint64_t mul128(uint64_t a, uint64_t b, uint64_t* product_hi)
+{
+return _umul128(a,b,product_hi);
+}
+#else
 static inline uint64_t mul128(uint64_t a, uint64_t b, uint64_t* product_hi)
 {
 	uint64_t lo, hi;
-	
+
 	__asm__("mul %%rdx":
-	"=a" (lo), "=d" (hi):
-	"a" (a), "d" (b));
-	
+	"=a" (lo), "=d" (hi) :
+		"a" (a), "d" (b));
+
 	*product_hi = hi;
-	
+
 	return lo;
 }
-
+#endif // _MSC_VER
 #define BYTE(x, y)		(((x) >> ((y) << 3)) & 0xFF)
 #define ROTL32(x, y)	(((x) << (y)) | ((x) >> (32 - (y))))
 
@@ -186,55 +190,56 @@ void AESExpandKey256(uint32_t *keybuf)
 
 void cryptonight(uint8_t *Output, uint8_t *Input, uint32_t Length)
 {
-	CryptonightCtx CNCtx;
+	CryptonightCtx *CNCtx = (CryptonightCtx*)malloc(sizeof(CryptonightCtx));
+	//sleep(10);
 	uint64_t text[16], a[2], b[2];
 	uint32_t ExpandedKey1[64], ExpandedKey2[64];
 	
-	CNKeccak(CNCtx.State, Input, Length);
+  CNKeccak(CNCtx.State, Input, Length);
 	
-	for(int i = 0; i < 4; ++i) ((uint64_t *)ExpandedKey1)[i] = CNCtx.State[i];
-	for(int i = 0; i < 4; ++i) ((uint64_t *)ExpandedKey2)[i] = CNCtx.State[i + 4];
+	for(int i = 0; i < 4; ++i) ((uint64_t *)ExpandedKey1)[i] = CNCtx[0].State[i];
+	for(int i = 0; i < 4; ++i) ((uint64_t *)ExpandedKey2)[i] = CNCtx[0].State[i + 4];
 	
 	AESExpandKey256(ExpandedKey1);
 	AESExpandKey256(ExpandedKey2);
 	
-	memcpy(text, CNCtx.State + 8, 128);
+	memcpy(text, CNCtx[0].State + 8, 128);
 	
 	for(int i = 0; i < 0x4000; ++i)
 	{
 		for(int j = 0; j < 8; ++j)
 		{
-			CNAESTransform(text + (j << 1), ExpandedKey1);
+			CNAESTransform((uint32_t*)(text + (j << 1)), ExpandedKey1);
 		}
 		
-		memcpy(CNCtx.Scratchpad + (i << 4), text, 128);
+		memcpy(CNCtx[0].Scratchpad + (i << 4), text, 128);
 	}
 	
-	a[0] = CNCtx.State[0] ^ CNCtx.State[4];
-	b[0] = CNCtx.State[2] ^ CNCtx.State[6];
-	a[1] = CNCtx.State[1] ^ CNCtx.State[5];
-	b[1] = CNCtx.State[3] ^ CNCtx.State[7];
+	a[0] = CNCtx[0].State[0] ^ CNCtx[0].State[4];
+	b[0] = CNCtx[0].State[2] ^ CNCtx[0].State[6];
+	a[1] = CNCtx[0].State[1] ^ CNCtx[0].State[5];
+	b[1] = CNCtx[0].State[3] ^ CNCtx[0].State[7];
 	
 	for(int i = 0; i < 0x80000; ++i)
 	{
 		uint64_t c[2];
-		memcpy(c, CNCtx.Scratchpad + ((a[0] & 0x1FFFF0) >> 3), 16);
+		memcpy(c, CNCtx[0].Scratchpad + ((a[0] & 0x1FFFF0) >> 3), 16);
 		
-		CNAESRnd(c, a);
+		CNAESRnd((uint32_t*)c, (uint32_t*)a);
 		
 		b[0] ^= c[0];
 		b[1] ^= c[1];
 		
-		memcpy(CNCtx.Scratchpad + ((a[0] & 0x1FFFF0) >> 3), b, 16);
+		memcpy(CNCtx[0].Scratchpad + ((a[0] & 0x1FFFF0) >> 3), b, 16);
 		
-		memcpy(b, CNCtx.Scratchpad + ((c[0] & 0x1FFFF0) >> 3), 16);
+		memcpy(b, CNCtx[0].Scratchpad + ((c[0] & 0x1FFFF0) >> 3), 16);
 		
 		uint64_t hi;
 		
 		a[1] += mul128(c[0], b[0], &hi);
 		a[0] += hi;
 		
-		memcpy(CNCtx.Scratchpad + ((c[0] & 0x1FFFF0) >> 3), a, 16);
+		memcpy(CNCtx[0].Scratchpad + ((c[0] & 0x1FFFF0) >> 3), a, 16);
 		
 		a[0] ^= b[0];
 		a[1] ^= b[1];
@@ -243,30 +248,30 @@ void cryptonight(uint8_t *Output, uint8_t *Input, uint32_t Length)
 		b[1] = c[1];
 	}
 	
-	memcpy(text, CNCtx.State + 8, 128);
+	memcpy(text, CNCtx[0].State + 8, 128);
 	
 	for(int i = 0; i < 0x4000; ++i)
 	{
-		for(int j = 0; j < 16; ++j) text[j] ^= CNCtx.Scratchpad[(i << 4) + j];
+		for(int j = 0; j < 16; ++j) text[j] ^= CNCtx[0].Scratchpad[(i << 4) + j];
 		
 		for(int j = 0; j < 8; ++j)
 		{
-			CNAESTransform(text + (j << 1), ExpandedKey2);
+			CNAESTransform((uint32_t*)(text + (j << 1)), ExpandedKey2);
 		}
 	}
 	
 	// Tail Keccak and arbitrary hash func here
-	memcpy(CNCtx.State + 8, text, 128);
+	memcpy(CNCtx[0].State + 8, text, 128);
 	
-	CNKeccakF1600(((uint64_t *)CNCtx.State));
+	CNKeccakF1600(((uint64_t *)CNCtx[0].State));
 	
-	switch(CNCtx.State[0] & 3)
+	switch(CNCtx[0].State[0] & 3)
 	{
 		case 0:
 		{
 			sph_blake256_context blakectx;
 			sph_blake256_init(&blakectx);
-			sph_blake256(&blakectx, CNCtx.State, 200);
+			sph_blake256(&blakectx, CNCtx[0].State, 200);
 			sph_blake256_close(&blakectx, Output);
 			break;
 		}
@@ -274,7 +279,7 @@ void cryptonight(uint8_t *Output, uint8_t *Input, uint32_t Length)
 		{
 			sph_groestl256_context groestl256;
 			sph_groestl256_init(&groestl256);
-			sph_groestl256(&groestl256, CNCtx.State, 200);
+			sph_groestl256(&groestl256, CNCtx[0].State, 200);
 			sph_groestl256_close(&groestl256, Output);
 			break;
 		}
@@ -282,7 +287,7 @@ void cryptonight(uint8_t *Output, uint8_t *Input, uint32_t Length)
 		{
 			sph_jh256_context jh256;
 			sph_jh256_init(&jh256);
-			sph_jh256(&jh256, CNCtx.State, 200);
+			sph_jh256(&jh256, CNCtx[0].State, 200);
 			sph_jh256_close(&jh256, Output);
 			break;
 		}
@@ -290,15 +295,17 @@ void cryptonight(uint8_t *Output, uint8_t *Input, uint32_t Length)
 		{
 			sph_skein256_context skein256;
 			sph_skein256_init(&skein256);
-			sph_skein256(&skein256, CNCtx.State, 200);
+			sph_skein256(&skein256, CNCtx[0].State, 200);
 			sph_skein256_close(&skein256, Output);
 			break;
 		}
 	}
+free(CNCtx);
 }
 
 void cryptonight_regenhash(struct work *work)
 {
+
 	uint32_t data[20];
 	uint32_t *nonce = (uint32_t *)(work->data + 39);
 	uint32_t *ohash = (uint32_t *)(work->hash);
@@ -307,9 +314,9 @@ void cryptonight_regenhash(struct work *work)
 	
 	memcpy(data, work->data, work->XMRBlobLen);
 		
-	cryptonight(ohash, data, work->XMRBlobLen);
+  cryptonight(ohash, data, work->XMRBlobLen);
 	
-	char *tmpdbg = bin2hex(ohash, 32);
+	char *tmpdbg = bin2hex((uint8_t*)ohash, 32);
 	
 	applog(LOG_DEBUG, "cryptonight_regenhash: %s\n", tmpdbg);
 	

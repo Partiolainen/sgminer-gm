@@ -45,3 +45,5 @@ lib/warn-on-use.h
 mkinstalldirs
 
 *.swp
+/.vs
+/winbuild/.vs/sgminer/v15
