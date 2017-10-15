@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,33 +22,37 @@
     <ProjectGuid>{CCA64DCD-6401-42A3-ABC3-89E48A36D239}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>sgminer</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>Static</UseOfMfc>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -86,6 +90,8 @@
     <OutDir>$(SolutionDir)output\x64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)output\x64\obj\</IntDir>
     <GenerateManifest>false</GenerateManifest>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -182,10 +188,10 @@
       <PreprocessorDefinitions>_CONSOLE;WIN32;PTW32_STATIC_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>$(ProjectDir)..;$(ProjectDir)dist\include\;$(ProjectDir)..\submodules\jansson\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>SyncCThrow</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -193,7 +199,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
       <AdditionalLibraryDirectories>$(ProjectDir)dist\lib\x86;$(ProjectDir)jansson\Release\x86</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libvcruntime.lib;msvcrt.lib;normaliz.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;pthreadVC2.lib;libcurl_a.lib;libeay32MT.lib;ssleay32MT.lib;zlibstat.lib;ws2_32.lib;Wldap32.lib;pdcurses.lib;panel.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>
@@ -217,39 +223,44 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_M_AMD64;_AMD64_;WIN32;_WIN64;PTW32_STATIC_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_M_AMD64;_AMD64_;WIN32;_WIN64;PTW32_STATIC_LIB;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>$(ProjectDir)..;$(ProjectDir)dist\include\;$(ProjectDir)..\submodules\jansson\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ExceptionHandling>false</ExceptionHandling>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>false</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)dist\lib\x64;$(ProjectDir)jansson\Release\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(ProjectDir)dist\lib\x64;$(ProjectDir)jansson\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>MinCore_Downlevel.lib;MinCore.lib;msvcrt.lib;normaliz.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;pthreadVC2.lib;libcurl_a.lib;zlibstat.lib;ws2_32.lib;Wldap32.lib;pdcurses.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkStatus>false</LinkStatus>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PostBuildEvent>
       <Command>
-        xcopy /Y /E /I "$(ProjectDir)..\kernel" "$(OutDir)\kernel"
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
-        del /f "$(OutDir)*.exe"
+      
         del /f "$(OutDir)*.dll"
 
         echo #define USE_GIT_VERSION 1 &gt; "$(ProjectDir)dist\include\gitversion.h"
@@ -263,10 +274,18 @@
     <ClCompile Include="..\algorithm.c" />
     <ClCompile Include="..\algorithm\animecoin.c" />
     <ClCompile Include="..\algorithm\bitblock.c" />
+    <ClCompile Include="..\algorithm\blake256.c" />
+    <ClCompile Include="..\algorithm\blakecoin.c" />
     <ClCompile Include="..\algorithm\credits.c" />
+    <ClCompile Include="..\algorithm\cryptonight.c" />
+    <ClCompile Include="..\algorithm\equihash.c" />
+    <ClCompile Include="..\algorithm\eth-sha3.c" />
+    <ClCompile Include="..\algorithm\ethash.c" />
+    <ClCompile Include="..\algorithm\ethgencache.c" />
     <ClCompile Include="..\algorithm\lyra2.c" />
     <ClCompile Include="..\algorithm\lyra2re.c" />
     <ClCompile Include="..\algorithm\lyra2rev2.c" />
+    <ClCompile Include="..\algorithm\lyra2Z.c" />
     <ClCompile Include="..\algorithm\neoscrypt.c" />
     <ClCompile Include="..\algorithm\pluck.c" />
     <ClCompile Include="..\algorithm\sponge.c" />
@@ -275,6 +294,9 @@
     <ClCompile Include="..\algorithm\x14.c" />
     <ClCompile Include="..\algorithm\fresh.c" />
     <ClCompile Include="..\algorithm\whirlcoin.c" />
+    <ClCompile Include="..\algorithm\yescrypt-opt.c" />
+    <ClCompile Include="..\algorithm\yescrypt.c" />
+    <ClCompile Include="..\algorithm\yescryptcommon.c" />
     <ClCompile Include="..\api.c" />
     <ClCompile Include="..\ccan\opt\helpers.c" />
     <ClCompile Include="..\ccan\opt\opt.c" />
@@ -287,6 +309,7 @@
     <ClCompile Include="..\findnonce.c" />
     <ClCompile Include="..\algorithm\fuguecoin.c" />
     <ClCompile Include="..\algorithm\groestlcoin.c" />
+    <ClCompile Include="..\gbt-util.c" />
     <ClCompile Include="..\hexdump.c" />
     <ClCompile Include="..\algorithm\inkcoin.c" />
     <ClCompile Include="..\logging.c" />
@@ -315,7 +338,9 @@
     <ClCompile Include="..\sph\keccak.c" />
     <ClCompile Include="..\sph\luffa.c" />
     <ClCompile Include="..\sph\panama.c" />
+    <ClCompile Include="..\sph\ripemd.c" />
     <ClCompile Include="..\sph\sha2.c" />
+    <ClCompile Include="..\sph\sha256_Y.c" />
     <ClCompile Include="..\sph\sha2big.c" />
     <ClCompile Include="..\sph\shabal.c" />
     <ClCompile Include="..\sph\shavite.c" />
@@ -323,6 +348,7 @@
     <ClCompile Include="..\sph\skein.c" />
     <ClCompile Include="..\algorithm\twecoin.c" />
     <ClCompile Include="..\sph\whirlpool.c" />
+    <ClCompile Include="..\sysfs-gpu-controls.c" />
     <ClCompile Include="..\util.c" />
   </ItemGroup>
   <ItemGroup>
@@ -330,10 +356,18 @@
     <ClInclude Include="..\algorithm.h" />
     <ClInclude Include="..\algorithm\animecoin.h" />
     <ClInclude Include="..\algorithm\bitblock.h" />
+    <ClInclude Include="..\algorithm\blake256.h" />
+    <ClInclude Include="..\algorithm\blakecoin.h" />
+    <ClInclude Include="..\algorithm\cn-aes-tbls.h" />
     <ClInclude Include="..\algorithm\credits.h" />
+    <ClInclude Include="..\algorithm\cryptonight.h" />
+    <ClInclude Include="..\algorithm\equihash.h" />
+    <ClInclude Include="..\algorithm\eth-sha3.h" />
+    <ClInclude Include="..\algorithm\ethash.h" />
     <ClInclude Include="..\algorithm\lyra2.h" />
     <ClInclude Include="..\algorithm\lyra2re.h" />
     <ClInclude Include="..\algorithm\lyra2rev2.h" />
+    <ClInclude Include="..\algorithm\lyra2Z.h" />
     <ClInclude Include="..\algorithm\neoscrypt.h" />
     <ClInclude Include="..\algorithm\pluck.h" />
     <ClInclude Include="..\algorithm\sponge.h" />
@@ -343,6 +377,8 @@
     <ClInclude Include="..\algorithm\x14.h" />
     <ClInclude Include="..\algorithm\fresh.h" />
     <ClInclude Include="..\algorithm\whirlcoin.h" />
+    <ClInclude Include="..\algorithm\yescrypt.h" />
+    <ClInclude Include="..\algorithm\yescrypt_core.h" />
     <ClInclude Include="..\api.h" />
     <ClInclude Include="..\arg-nonnull.h" />
     <ClInclude Include="..\bench_block.h" />
@@ -357,6 +393,7 @@
     <ClInclude Include="..\algorithm\fuguecoin.h" />
     <ClInclude Include="..\algorithm\groestlcoin.h" />
     <ClInclude Include="..\algorithm\inkcoin.h" />
+    <ClInclude Include="..\gbt-util.h" />
     <ClInclude Include="..\logging.h" />
     <ClInclude Include="..\algorithm\marucoin.h" />
     <ClInclude Include="..\algorithm\maxcoin.h" />
@@ -382,6 +419,7 @@
     <ClInclude Include="..\sph\sph_keccak.h" />
     <ClInclude Include="..\sph\sph_luffa.h" />
     <ClInclude Include="..\sph\sph_panama.h" />
+    <ClInclude Include="..\sph\sph_ripemd.h" />
     <ClInclude Include="..\sph\sph_sha2.h" />
     <ClInclude Include="..\sph\sph_shabal.h" />
     <ClInclude Include="..\sph\sph_shavite.h" />
@@ -390,6 +428,7 @@
     <ClInclude Include="..\sph\sph_types.h" />
     <ClInclude Include="..\algorithm\twecoin.h" />
     <ClInclude Include="..\sph\sph_whirlpool.h" />
+    <ClInclude Include="..\sysfs-gpu-controls.h" />
     <ClInclude Include="..\uthash.h" />
     <ClInclude Include="..\util.h" />
     <ClInclude Include="..\warn-on-use.h" />
