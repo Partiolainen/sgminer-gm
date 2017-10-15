@@ -117,9 +117,9 @@ void CNKeccak(uint64_t *output, uint64_t *input, uint32_t Length)
 	
 	memcpy(st, input, Length);
 	
-	((uint8_t *)st)[Length] = 0x01;
+	reinterpret_cast<uint8_t *>(st)[Length] = 0x01;
 	
-	memset(((uint8_t *)st) + Length + 1, 0x00, 128 - Length - 1);
+	memset(reinterpret_cast<uint8_t *>(st) + Length + 1, 0x00, 128 - Length - 1);
 	
 	for(int i = 16; i < 25; ++i) st[i] = 0x00UL;
 	
@@ -188,14 +188,14 @@ void AESExpandKey256(uint32_t *keybuf)
 	}
 }
 
-void cryptonight(uint8_t *Output, uint8_t *Input, uint32_t Length)
+void cryptonight(uint8_t* Output, uint64_t* Input, uint32_t Length)
 {
 	CryptonightCtx *CNCtx = (CryptonightCtx*)malloc(sizeof(CryptonightCtx));
 	//sleep(10);
 	uint64_t text[16], a[2], b[2];
 	uint32_t ExpandedKey1[64], ExpandedKey2[64];
 	
-  CNKeccak(CNCtx.State, Input, Length);
+    CNKeccak(CNCtx->State, Input, Length);
 	
 	for(int i = 0; i < 4; ++i) ((uint64_t *)ExpandedKey1)[i] = CNCtx[0].State[i];
 	for(int i = 0; i < 4; ++i) ((uint64_t *)ExpandedKey2)[i] = CNCtx[0].State[i + 4];
@@ -305,18 +305,17 @@ free(CNCtx);
 
 void cryptonight_regenhash(struct work *work)
 {
-
-	uint32_t data[20];
-	uint32_t *nonce = (uint32_t *)(work->data + 39);
-	uint32_t *ohash = (uint32_t *)(work->hash);
+	uint64_t data[20];
+	uint32_t *nonce = reinterpret_cast<uint32_t *>(work->data + 39);
+	uint8_t* ohash = reinterpret_cast<uint8_t *>(work->hash);
 	
 	work->XMRNonce = *nonce;
 	
 	memcpy(data, work->data, work->XMRBlobLen);
 		
-  cryptonight(ohash, data, work->XMRBlobLen);
+    cryptonight(ohash, data, work->XMRBlobLen);
 	
-	char *tmpdbg = bin2hex((uint8_t*)ohash, 32);
+	char *tmpdbg = bin2hex(static_cast<uint8_t*>(ohash), 32);
 	
 	applog(LOG_DEBUG, "cryptonight_regenhash: %s\n", tmpdbg);
 	
