@@ -279,6 +279,7 @@
     <ClCompile Include="..\algorithm\blakecoin.c" />
     <ClCompile Include="..\algorithm\credits.c" />
     <ClCompile Include="..\algorithm\cryptonight.c" />
+    <ClCompile Include="..\algorithm\decred.c" />
     <ClCompile Include="..\algorithm\equihash.c" />
     <ClCompile Include="..\algorithm\eth-sha3.c" />
     <ClCompile Include="..\algorithm\ethash.c" />
@@ -362,6 +363,7 @@
     <ClInclude Include="..\algorithm\cn-aes-tbls.h" />
     <ClInclude Include="..\algorithm\credits.h" />
     <ClInclude Include="..\algorithm\cryptonight.h" />
+    <ClInclude Include="..\algorithm\decred.h" />
     <ClInclude Include="..\algorithm\equihash.h" />
     <ClInclude Include="..\algorithm\eth-sha3.h" />
     <ClInclude Include="..\algorithm\ethash.h" />

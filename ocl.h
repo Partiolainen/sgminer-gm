@@ -22,7 +22,7 @@ typedef struct __clState {
   cl_mem buffer2;
   cl_mem buffer3;
   cl_mem index_buf[9];
-  unsigned char cldata[168];
+  unsigned char cldata[256];
   bool goffset;
   cl_uint vwidth;
   int devid;

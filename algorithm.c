@@ -40,6 +40,7 @@
 #include "algorithm/credits.h"
 #include "algorithm/blake256.h"
 #include "algorithm/blakecoin.h"
+#include "algorithm/decred.h"
 #include "algorithm/ethash.h"
 #include "algorithm/cryptonight.h"
 #include "algorithm/equihash.h"
@@ -74,6 +75,7 @@ const char *algorithm_type_str[] = {
   "Yescrypt-multi",
   "Blakecoin",
   "Blake",
+  "Decred",
   "Vanilla",
   "Ethash",
   "Cryptonight",
@@ -148,6 +150,17 @@ static void append_neoscrypt_compiler_options(struct _build_kernel_data *data, s
 
   sprintf(buf, "%stc%lu", ((cgpu->lookup_gap > 0) ? "lg" : ""), (unsigned long)cgpu->thread_concurrency);
   strcat(data->binary_filename, buf);
+}
+
+static void append_blake256_compiler_options(struct _build_kernel_data *data, struct cgpu_info *cgpu, struct _algorithm_t *algorithm)
+{
+	char buf[255];
+	sprintf(buf, " -D LOOKUP_GAP=%d -D MAX_GLOBAL_THREADS=%lu ",
+		cgpu->lookup_gap, (unsigned long)cgpu->thread_concurrency);
+	strcat(data->compiler_options, buf);
+
+	sprintf(buf, "tc%lu", (unsigned long)cgpu->thread_concurrency);
+	strcat(data->binary_filename, buf);
 }
 
 static void append_x11_compiler_options(struct _build_kernel_data *data, struct cgpu_info *cgpu, struct _algorithm_t *algorithm)
@@ -1014,6 +1027,39 @@ static cl_int queue_blake_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_un
   return status;
 }
 
+static cl_int queue_decred_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_unused cl_uint threads)
+{
+	cl_kernel *kernel = &clState->kernel;
+	unsigned int num = 0;
+	cl_int status = 0;
+
+	CL_SET_ARG(clState->outputBuffer);
+	/* Midstate */
+	CL_SET_BLKARG(ctx_a);
+	CL_SET_BLKARG(ctx_b);
+	CL_SET_BLKARG(ctx_c);
+	CL_SET_BLKARG(ctx_d);
+	CL_SET_BLKARG(ctx_e);
+	CL_SET_BLKARG(ctx_f);
+	CL_SET_BLKARG(ctx_g);
+	CL_SET_BLKARG(ctx_h);
+	/* Last 52 bytes of data (without nonce) */
+	CL_SET_BLKARG(cty_a);
+	CL_SET_BLKARG(cty_b);
+	CL_SET_BLKARG(cty_c);
+	CL_SET_BLKARG(cty_d);
+	CL_SET_BLKARG(cty_e);
+	CL_SET_BLKARG(cty_f);
+	CL_SET_BLKARG(cty_g);
+	CL_SET_BLKARG(cty_h);
+	CL_SET_BLKARG(cty_i);
+	CL_SET_BLKARG(cty_j);
+	CL_SET_BLKARG(cty_k);
+	CL_SET_BLKARG(cty_l);
+
+	return status;
+}
+
 extern pthread_mutex_t eth_nonce_lock;
 extern uint32_t eth_nonce;
 static const int eth_future_epochs = 6;
@@ -1281,6 +1327,11 @@ static algorithm_settings_t algos[] = {
   { a, ALGO_CRE, "", 1, 1, 1, 0, 0, 0xFF, 0xFFFF000000000000ULL, 0x0000ffffUL, 0, -1, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, credits_regenhash, NULL, NULL, queue_credits_kernel, gen_hash, NULL}
   A_CREDITS("credits"),
 #undef A_CREDITS
+
+#define A_DECRED(a) \
+  { a, ALGO_DECRED, "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0x0, 0, 0, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, decred_regenhash, decred_midstate, decred_prepare_work, queue_decred_kernel, gen_hash, append_blake256_compiler_options }
+  A_DECRED("decred"),
+#undef A_DECRED
 
 #define A_YESCRYPT(a) \
   { a, ALGO_YESCRYPT, "", 1, 65536, 65536, 0, 0, 0xFF, 0xFFFF000000000000ULL, 0x0000ffffUL, 0, -1, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, yescrypt_regenhash, NULL, NULL, queue_yescrypt_kernel, gen_hash, append_neoscrypt_compiler_options}
