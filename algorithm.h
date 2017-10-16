@@ -76,7 +76,8 @@ typedef struct _algorithm_t {
   long rw_buffer_size;
   cl_command_queue_properties cq_properties;
   void(*regenhash)(struct work *);
-  void(*precalc_hash)(struct _dev_blk_ctx *, uint32_t *, uint32_t *);
+  void(*calc_midstate)(struct work *);
+  void(*prepare_work)(struct _dev_blk_ctx *, uint32_t *, uint32_t *);
   cl_int(*queue_kernel)(struct __clState *, struct _dev_blk_ctx *, cl_uint);
   void(*gen_hash)(const unsigned char *, unsigned int, unsigned char *);
   void(*set_compile_options)(struct _build_kernel_data *, struct cgpu_info *, struct _algorithm_t *);
@@ -98,11 +99,12 @@ typedef struct _algorithm_settings_t
 	size_t n_extra_kernels;
 	long rw_buffer_size;
 	cl_command_queue_properties cq_properties;
-	void     (*regenhash)(struct work *);
-	void     (*precalc_hash)(struct _dev_blk_ctx *, uint32_t *, uint32_t *);
-	cl_int   (*queue_kernel)(struct __clState *, struct _dev_blk_ctx *, cl_uint);
-	void     (*gen_hash)(const unsigned char *, unsigned int, unsigned char *);
-	void     (*set_compile_options)(build_kernel_data *, struct cgpu_info *, algorithm_t *);
+	void(*regenhash)(struct work *);
+	void(*calc_midstate)(struct work *);
+	void(*prepare_work)(struct _dev_blk_ctx *, uint32_t *, uint32_t *);
+	cl_int(*queue_kernel)(struct __clState *, struct _dev_blk_ctx *, cl_uint);
+	void(*gen_hash)(const unsigned char *, unsigned int, unsigned char *);
+	void(*set_compile_options)(build_kernel_data *, struct cgpu_info *, algorithm_t *);
 } algorithm_settings_t;
 
 /* Set default parameters based on name. */

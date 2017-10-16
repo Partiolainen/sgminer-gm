@@ -224,12 +224,6 @@
     <ClCompile Include="..\algorithm\credits.c">
       <Filter>Source Files\algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="..\algorithm\blake256.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\algorithm\blakecoin.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\algorithm\cryptonight.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -268,6 +262,12 @@
     </ClCompile>
     <ClCompile Include="..\sysfs-gpu-controls.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\algorithm\blake256.c">
+      <Filter>Source Files\algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\algorithm\blakecoin.c">
+      <Filter>Source Files\algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -478,12 +478,6 @@
     <ClInclude Include="..\algorithm\sysendian.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\algorithm\blake256.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\algorithm\blakecoin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\algorithm\cn-aes-tbls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -516,6 +510,12 @@
     </ClInclude>
     <ClInclude Include="..\sysfs-gpu-controls.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\algorithm\blake256.h">
+      <Filter>Header Files\algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\algorithm\blakecoin.h">
+      <Filter>Header Files\algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
