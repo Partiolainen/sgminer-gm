@@ -1,8 +1,6 @@
 #ifndef API_H
 #define API_H
 
-#include "config.h"
-
 #include "miner.h"
 
 // BUFSIZ varies on Windows and Linux

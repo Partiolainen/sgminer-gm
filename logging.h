@@ -1,7 +1,6 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-#include "config.h"
 #include <stdbool.h>
 #include <stdarg.h>
 

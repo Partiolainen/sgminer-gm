@@ -2,7 +2,6 @@
 #define BUILD_KERNEL_H
 
 #include <stdbool.h>
-#include "logging.h"
 
 #ifdef __APPLE_CC__
 #include <OpenCL/opencl.h>

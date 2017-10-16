@@ -1,11 +1,8 @@
 #ifndef CONFIG_PARSER_H
 #define CONFIG_PARSER_H
 
-#include "config.h"
-
 #include "miner.h"
 #include "api.h"
-#include "algorithm.h"
 
 //profile structure
 struct profile {

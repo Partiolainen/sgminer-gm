@@ -1,16 +1,7 @@
 #ifndef OCL_H
 #define OCL_H
 
-#include "config.h"
-
 #include <stdbool.h>
-#ifdef __APPLE_CC__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/cl.h>
-#endif
-
-#include "algorithm.h"
 
 typedef struct __clState {
   cl_context context;

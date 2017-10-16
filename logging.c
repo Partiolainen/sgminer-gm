@@ -12,8 +12,8 @@
 
 #include <unistd.h>
 
-#include "logging.h"
 #include "miner.h"
+#include "logging.h"
 
 bool opt_debug = false;
 bool opt_debug_console = false;
