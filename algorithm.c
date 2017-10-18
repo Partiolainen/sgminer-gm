@@ -84,6 +84,7 @@ const char *algorithm_type_str[] = {
   "Decred",
   "Vanilla",
   "Lbry",
+  "Sibcoin",
   "Ethash",
   "Cryptonight",
   "Equihash",
