@@ -1984,7 +1984,6 @@ void free_work(struct work *w)
 }
 
 static void calc_diff(struct work *work, double known);
-char *workpadding = "000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000";
 
 #ifdef HAVE_LIBCURL
 /* Process transactions with GBT by storing the binary value of the first
@@ -2241,8 +2240,7 @@ static void gen_gbt_work(struct pool *pool, struct work *work)
 
   flip32(work->data + offsetMerkleRoot, merkleroot);
   free(merkleroot);
-  memset(work->data + offsetNonce, 0, nonceLen); /* nonce */
-
+  
   if (pool->algorithm.type == ALGO_EQUIHASH) {
     //add entropy to nonce
     memcpy(work->data + offsetNonce + 8, entropy, 12);
@@ -2253,9 +2251,7 @@ static void gen_gbt_work(struct pool *pool, struct work *work)
     add_var_int(work->equihash_data + offsetNonce + 32, 1344);
   }
 
-  if (lenPadding > 0) {
-    hex2bin(work->data + offsetPadding, workpadding, lenPadding);
-  }
+  memset(work->data + 4 + 32 + 32 + 4 + 4, 0, 4 + 48); /* nonce + padding */
 
   if (opt_debug) {
     char *header = bin2hex(work->data, headerLen);

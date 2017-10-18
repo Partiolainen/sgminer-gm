@@ -1296,7 +1296,6 @@ extern char current_hash[68];
 extern double current_diff;
 extern double best_diff;
 extern struct timeval block_timeval;
-extern char *workpadding;
 
 //config options table
 extern struct opt_table opt_config_table[];
