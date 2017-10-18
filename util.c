@@ -1667,7 +1667,7 @@ static bool parse_notify(struct pool *pool, json_t *val)
 	}
 
 	char *job_id, *prev_hash, *coinbase1, *coinbase2, *bbversion, *nbit,
-		*ntime, *header, *trie;
+		*ntime, *header, *trie = NULL;
 	size_t cb1_len, cb2_len, alloc_len, header_len;
 	unsigned char *cb1, *cb2;
 	bool clean, ret = false, has_trie = false;
