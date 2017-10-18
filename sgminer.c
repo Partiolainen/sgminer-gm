@@ -6088,7 +6088,7 @@ static void *stratum_sthread(void *userdata)
       free(solution);
     }
     else {
-		if ((pool->algorithm.type != ALGO_DECRED && unlikely(work->nonce2_len > 8)) || (pool->algorithm.type == ALGO_DECRED && unlikely(work->nonce2_len > 16))) {
+		if (unlikely(work->nonce2_len > 8)) {
         applog(LOG_ERR, "%s asking for inappropriately long nonce2 length %d", get_pool_name(pool), (int)work->nonce2_len);
         applog(LOG_ERR, "Not attempting to submit shares");
         free_work(work);
@@ -6116,12 +6116,7 @@ static void *stratum_sthread(void *userdata)
 
       __bin2hex(noncehex, (const unsigned char *)&nonce, 4);
 
-	  if (pool->algorithm.type == ALGO_DECRED) {
-		  memcpy(nonce2, work->data + 144, work->nonce2_len);
-	  }
-	  else {
-		  *((uint64_t *)nonce2) = htole64(work->nonce2);
-	  }
+	  *((uint64_t *)nonce2) = htole64(work->nonce2);
       __bin2hex(nonce2hex, nonce2, work->nonce2_len);
       memset(s, 0, 1024);
 
@@ -6785,19 +6780,15 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
 
   cg_wlock(&pool->data_lock);
 
-  if (pool->algorithm.type == ALGO_DECRED) {
-	  datasize = 180;
-	  work->nonce2 = pool->nonce2++;
-	  work->nonce2_len = pool->n2size;
-  }
-  else {
+  nonce2le = htole64(pool->nonce2);
+  if (pool->algorithm.type != ALGO_DECRED) {
 	  /* Update coinbase. Always use an LE encoded nonce2 to fill in values
-		  * from left to right and prevent overflow errors with small n2sizes */
-	  nonce2le = htole64(pool->nonce2);
-	  memcpy(pool->coinbase + pool->nonce2_offset, &nonce2le, pool->n2size);
-	  work->nonce2 = pool->nonce2++;
-	  work->nonce2_len = pool->n2size;
+		  * from left to right and prevent overflow errors with small n2sizes */	 
+	  memcpy(pool->coinbase + pool->nonce2_offset, &nonce2le, pool->n2size);	  
   }
+
+  work->nonce2 = pool->nonce2++;
+  work->nonce2_len = pool->n2size;
 
   /* Downgrade to a read lock to read off the pool variables */
   cg_dwlock(&pool->data_lock);
@@ -6846,17 +6837,15 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
   }
   else if (pool->algorithm.type == ALGO_DECRED) {
 	  uint16_t vote = (uint16_t)(opt_vote << 1) | 1;
+	  size_t nonce2_offset = MIN(pool->n1_len, 36);
 	  memcpy(work->data, pool->header_bin, 4); // version
 	  flip32(work->data + 4, pool->header_bin + 4); // prevhash
 	  memcpy(work->data + 4 + 32, pool->coinbase, MIN((int)pool->swork.cb_len, 108));
-	  memcpy(work->data + 144, pool->nonce1bin, MIN(pool->n1_len, 36));
 	  memcpy(work->data + 100, &vote, 2);
-	  ((uint32_t *)work->data)[36] = work->nonce2;
-	  //    ((uint32_t *)work->data)[36] = 2;
-	  ((uint32_t *)work->data)[37] = ((rand() * 4) << 8) | work->thr_id;
-	  //    ((uint32_t *)work->data)[37] = 0x0000a400;
-	  for (i = 39; i < 45; i++)
+	  for (i = 36; i < 45; i++)
 		  ((uint32_t *)work->data)[i] = 0;
+	  memcpy(work->data + 144, pool->nonce1bin, nonce2_offset);
+	  memcpy(work->data + 144 + nonce2_offset, &nonce2le, pool->n2size);
   }
   else {
     data32 = (uint32_t *)merkle_sha;
@@ -6880,7 +6869,8 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
 
   if (opt_debug) {
     char *header, *merkle_hash;
-
+	int datasize = 128;
+	if (pool->algorithm.type == ALGO_DECRED) datasize = 180;
 	header = bin2hex(work->data, datasize);
 	if (pool->algorithm.type != ALGO_DECRED) {
 		merkle_hash = bin2hex((const unsigned char *)merkle_root, 32);
