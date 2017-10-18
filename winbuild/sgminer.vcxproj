@@ -284,6 +284,7 @@
     <ClCompile Include="..\algorithm\eth-sha3.c" />
     <ClCompile Include="..\algorithm\ethash.c" />
     <ClCompile Include="..\algorithm\ethgencache.c" />
+    <ClCompile Include="..\algorithm\lbry.c" />
     <ClCompile Include="..\algorithm\lyra2.c" />
     <ClCompile Include="..\algorithm\lyra2re.c" />
     <ClCompile Include="..\algorithm\lyra2rev2.c" />
@@ -367,6 +368,7 @@
     <ClInclude Include="..\algorithm\equihash.h" />
     <ClInclude Include="..\algorithm\eth-sha3.h" />
     <ClInclude Include="..\algorithm\ethash.h" />
+    <ClInclude Include="..\algorithm\lbry.h" />
     <ClInclude Include="..\algorithm\lyra2.h" />
     <ClInclude Include="..\algorithm\lyra2re.h" />
     <ClInclude Include="..\algorithm\lyra2rev2.h" />

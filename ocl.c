@@ -907,8 +907,11 @@ out:
 	case ALGO_DECRED:
 		readbufsize = 192;
 		break;
-    case ALGO_ETHASH:
-      readbufsize = 32;
+	case ALGO_ETHASH:
+		readbufsize = 32;
+		break;
+    case ALGO_LBRY:
+      readbufsize = 112;
       break;
     default:
       readbufsize = 128;
