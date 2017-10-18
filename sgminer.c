@@ -6107,6 +6107,9 @@ static void *stratum_sthread(void *userdata)
 	  else if (pool->algorithm.type == ALGO_SIA) {
 		  nonce = *((uint32_t *)(work->data + 32));
 	  }
+	  else if (pool->algorithm.type == ALGO_PASCAL) {
+		  nonce = htobe32(*((uint32_t *)(work->data + 196)));
+	  }
 	  else if (pool->algorithm.type == ALGO_DECRED) {
 		  nonce = *((uint32_t *)(work->data + 140));
 	  }
@@ -6778,7 +6781,15 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
   int i, j;
 
   cg_wlock(&pool->data_lock);
-
+  if (pool->algorithm.type == ALGO_PASCAL) {
+	  /* TODO: refactor this */
+	  for (i = 0; i < 56; i += 8) {
+		  if (((pool->nonce2 >> i) & 0xff) < 0x2d) pool->nonce2 = (pool->nonce2 & (0xffffffffffffff00 << i)) + (0x002d2d2d2d2d2d2d >> (48 - i));
+		  if (((pool->nonce2 >> i) & 0xff) > 0xfe) pool->nonce2 = (pool->nonce2 & (0xffffffffffffff00 << i)) + (0x012d2d2d2d2d2d2d >> (48 - i));
+	  }
+	  if (((pool->nonce2 >> 56) & 0xff) < 0x2d) pool->nonce2 = 0x2d2d2d2d2d2d2d2d;
+	  if (((pool->nonce2 >> 56) & 0xff) > 0xfe) pool->nonce2 = 0x2d2d2d2d2d2d2d2d;
+  }
   nonce2le = htole64(pool->nonce2);
   if (pool->algorithm.type != ALGO_DECRED && pool->algorithm.type != ALGO_SIA) {
 	  /* Update coinbase. Always use an LE encoded nonce2 to fill in values
@@ -6792,7 +6803,7 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
   /* Downgrade to a read lock to read off the pool variables */
   cg_dwlock(&pool->data_lock);
 
-  if (pool->algorithm.type != ALGO_DECRED && pool->algorithm.type != ALGO_SIA) {
+  if (pool->algorithm.type != ALGO_DECRED && pool->algorithm.type != ALGO_SIA && pool->algorithm.type != ALGO_PASCAL) {
 	  /* Generate merkle root */
 	  pool->algorithm.gen_hash(pool->coinbase, pool->swork.cb_len, merkle_root);
 	  memcpy(merkle_sha, merkle_root, 32);
@@ -6854,6 +6865,14 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
 	  memcpy(work->data + 32 + 8, pool->header_bin + 68, 4); // timestamp
 	  flip32(work->data + 32 + 8 + 8, pool->coinbase); // merkleroot
   }
+  else if (pool->algorithm.type == ALGO_PASCAL) {
+	  uint32_t temp;
+	  memcpy(work->data, pool->coinbase, pool->swork.cb_len);
+	  hex2bin((unsigned char *)&temp, pool->swork.ntime, 4);
+	  /* Add the nbits (big endianess). */
+	  ((uint32_t *)work->data)[48] = be32toh(temp);
+	  ((uint32_t *)work->data)[49] = 0;
+  }
   else {
     data32 = (uint32_t *)merkle_sha;
     swap32 = (uint32_t *)merkle_root;
@@ -6878,8 +6897,9 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
     char *header, *merkle_hash;
 	int datasize = 128;
 	if (pool->algorithm.type == ALGO_DECRED) datasize = 180;
+	else if (pool->algorithm.type == ALGO_PASCAL) datasize = 256;
 	header = bin2hex(work->data, datasize);
-	if (pool->algorithm.type != ALGO_DECRED) {
+	if (pool->algorithm.type != ALGO_DECRED && pool->algorithm.type != ALGO_SIA && pool->algorithm.type != ALGO_PASCAL) {
 		merkle_hash = bin2hex((const unsigned char *)merkle_root, 32);
 		applog(LOG_DEBUG, "[THR%d] Generated stratum merkle %s", work->thr_id, merkle_hash);
 		free(merkle_hash);
@@ -7732,6 +7752,7 @@ static void rebuild_nonce(struct work *work, uint32_t nonce)
   else if (work->pool->algorithm.type == ALGO_LBRY) 
 	nonce_pos = 108;
   else if (work->pool->algorithm.type == ALGO_SIA) nonce_pos = 32;
+  else if (work->pool->algorithm.type == ALGO_PASCAL) nonce_pos = 196;
 
   if (work->pool->algorithm.type == ALGO_ETHASH) {
     uint64_t *work_nonce = (uint64_t *)(work->data + 32);

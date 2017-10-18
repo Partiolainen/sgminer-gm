@@ -913,6 +913,9 @@ out:
     case ALGO_LBRY:
       readbufsize = 112;
       break;
+	case ALGO_PASCAL:
+		readbufsize = 196;
+		break;
     default:
       readbufsize = 128;
   }

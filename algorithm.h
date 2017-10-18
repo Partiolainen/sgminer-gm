@@ -16,6 +16,7 @@ typedef enum {
   ALGO_CRE,
   ALGO_SCRYPT,
   ALGO_NSCRYPT,
+  ALGO_PASCAL,
   ALGO_X11,
   ALGO_X13,
   ALGO_X14,

@@ -284,6 +284,9 @@
     <ClCompile Include="..\sph\gost.c">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
+    <ClCompile Include="..\algorithm\pascal.c">
+      <Filter>Source Files\algorithm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\adl.h">
@@ -546,6 +549,9 @@
     </ClInclude>
     <ClInclude Include="..\sph\sph_gost.h">
       <Filter>Header Files\sph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\algorithm\pascal.h">
+      <Filter>Header Files\algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

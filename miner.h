@@ -761,6 +761,16 @@ static inline void flip80(void *dest_p, const void *src_p)
     dest[i] = swab32(src[i]);
 }
 
+static inline void flip196(void *dest_p, const void *src_p)
+{
+	uint32_t *dest = (uint32_t *)dest_p;
+	const uint32_t *src = (uint32_t *)src_p;
+	int i;
+
+	for (i = 0; i < 49; i++)
+		dest[i] = swab32(src[i]);
+}
+
 static inline void flip112(void *dest_p, const void *src_p)
 {
 	uint32_t *dest = (uint32_t *)dest_p;
@@ -821,6 +831,10 @@ static inline void endian_flip180(void *dest_p, const void *src_p)
 {
 	flip180(dest_p, src_p);
 }
+static inline void endian_flip196(void *dest_p, const void *src_p)
+{
+	flip196(dest_p, src_p);
+}
 #else
 static inline void
 endian_flip32(void __maybe_unused *dest_p, const void __maybe_unused *src_p)
@@ -838,6 +852,10 @@ endian_flip168(void __maybe_unused *dest_p, const void __maybe_unused *src_p)
 static inline void
 endian_flip180(void __maybe_unused *dest_p, const void __maybe_unused *src_p)
 {	
+}
+static inline void
+endian_flip196(void __maybe_unused *dest_p, const void __maybe_unused *src_p)
+{
 }
 #endif
 
