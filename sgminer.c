@@ -7768,8 +7768,7 @@ bool test_nonce(struct work *work, uint32_t nonce)
 static void update_work_stats(struct thr_info *thr, struct work *work)
 {
   double test_diff = current_diff;
-  test_diff *= work->pool->algorithm.share_diff_multiplier;
-
+  
   work->share_diff = share_diff(work);
 
   test_diff *= work->pool->algorithm.share_diff_multiplier;
