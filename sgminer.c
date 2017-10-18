@@ -6856,6 +6856,8 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
 		  ((uint32_t *)work->data)[i] = 0;
 	  memcpy(work->data + 144, pool->nonce1bin, nonce2_offset);
 	  memcpy(work->data + 144 + nonce2_offset, &nonce2le, pool->n2size);
+	  size_t extranonce_len = MAX((int)pool->swork.cb_len - pool->nonce2_offset - pool->n2size, 0);
+	  memcpy(work->data + 180 - extranonce_len, pool->coinbase + pool->nonce2_offset + pool->n2size, extranonce_len);
   }
   else if (pool->algorithm.type == ALGO_SIA) {
 	  size_t nonce2_offset = MIN(pool->n1_len, 4);
