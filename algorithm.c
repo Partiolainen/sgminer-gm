@@ -40,6 +40,7 @@
 #include "algorithm/credits.h"
 #include "algorithm/blake256.h"
 #include "algorithm/blakecoin.h"
+#include "algorithm/sia.h"
 #include "algorithm/decred.h"
 #include "algorithm/lbry.h"
 #include "algorithm/ethash.h"
@@ -75,6 +76,7 @@ const char *algorithm_type_str[] = {
   "Yescrypt",
   "Yescrypt-multi",
   "Blakecoin",
+  "Sia",
   "Blake",
   "Decred",
   "Vanilla",
@@ -1029,6 +1031,24 @@ static cl_int queue_blake_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_un
   return status;
 }
 
+static cl_int queue_sia_kernel(struct __clState *clState, struct _dev_blk_ctx *blk, __maybe_unused cl_uint threads)
+{
+	cl_kernel *kernel = &clState->kernel;
+	unsigned int num = 0;
+	cl_ulong le_target;
+	cl_int status = 0;
+
+	le_target = *(cl_ulong *)(blk->work->device_target + 24);
+	flip80(clState->cldata, blk->work->data);
+	status = clEnqueueWriteBuffer(clState->commandQueue, clState->CLbuffer0, true, 0, 80, clState->cldata, 0, NULL, NULL);
+
+	CL_SET_ARG(clState->CLbuffer0);
+	CL_SET_ARG(clState->outputBuffer);
+	CL_SET_ARG(le_target);
+
+	return status;
+}
+
 static cl_int queue_decred_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_unused cl_uint threads)
 {
 	cl_kernel *kernel = &clState->kernel;
@@ -1423,6 +1443,7 @@ static algorithm_settings_t algos[] = {
 
   { "blake256r8",  ALGO_BLAKECOIN, "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0x000000ffUL, 0, 128, 0, blakecoin_regenhash, blake256_midstate, blake256_prepare_work, queue_blake_kernel, sha256, NULL },
   { "blake256r14", ALGO_BLAKE,     "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0x00000000UL, 0, 128, 0, blake256_regenhash, blake256_midstate, blake256_prepare_work, queue_blake_kernel, gen_hash, NULL },
+  { "sia",         ALGO_SIA,       "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0x0000FFFFUL, 0, 128, 0, sia_regenhash, NULL, NULL, queue_sia_kernel, NULL, NULL },
   { "vanilla",     ALGO_VANILLA,   "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0x000000ffUL, 0, 128, 0, blakecoin_regenhash, blake256_midstate, blake256_prepare_work, queue_blake_kernel, gen_hash, NULL },
   { "lbry", ALGO_LBRY, "", 1, 256, 256, 0, 0, 0xFF, 0xFFFFULL, 0x0000ffffUL, 2, 4 * 8 * 4194304, 0, lbry_regenhash, NULL, NULL, queue_lbry_kernel, gen_hash, NULL },
   { "ethash",     ALGO_ETHASH,   "", (1ULL << 32), (1ULL << 32), 1, 0, 0, 0xFF, 0xFFFF000000000000ULL, 0x00000000UL, 0, 128, 0, ethash_regenhash, NULL, NULL, queue_ethash_kernel, gen_hash, append_ethash_compiler_options },
