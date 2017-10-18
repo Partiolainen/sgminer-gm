@@ -7781,7 +7781,7 @@ static void update_work_stats(struct thr_info *thr, struct work *work)
 
   test_diff *= work->pool->algorithm.share_diff_multiplier;
 
-  if (unlikely(work->pool->algorithm.type != ALGO_SIA && work->share_diff >= test_diff)) {
+  if (unlikely(work->share_diff >= test_diff)) {
     work->block = true;
     work->pool->solved++;
     found_blocks++;
