@@ -1754,20 +1754,37 @@ static bool parse_notify(struct pool *pool, json_t *val)
 	pool->swork.merkles = merkles;
 	if (clean)
 		pool->nonce2 = 0;
-	pool->merkle_offset = strlen(pool->swork.bbversion) +
-		strlen(pool->swork.prev_hash);
+	if (pool->algorithm.type == ALGO_SIA) {
+		pool->merkle_offset = strlen(pool->swork.prev_hash) +
+			+16 + strlen(pool->swork.ntime);
+	}
+	else {
+		pool->merkle_offset = strlen(pool->swork.bbversion) +
+			strlen(pool->swork.prev_hash);
+	}
 	pool->merkle_offset /= 2;
 	header = (char *)alloca(257);
-	snprintf(header, 257,
-		"%s%s%s%s%s%s%s",
-		pool->swork.bbversion,
-		pool->swork.prev_hash,
-		blank_merkel,
-		has_trie ? trie : "",
-		pool->swork.ntime,
-		pool->swork.nbit,
-		"00000000" /* nonce */
-	);
+	if (pool->algorithm.type == ALGO_SIA) {
+		snprintf(header, 257,
+			"%s%s%s%s",
+			pool->swork.prev_hash,
+			"0000000000000000", /* nonce */
+			pool->swork.ntime,
+			blank_merkel
+		);
+	}
+	else {
+		snprintf(header, 257,
+			"%s%s%s%s%s%s%s",
+			pool->swork.bbversion,
+			pool->swork.prev_hash,
+			blank_merkel,
+			has_trie ? trie : "",
+			pool->swork.ntime,
+			pool->swork.nbit,
+			"00000000" /* nonce */
+		);
+	}
 	header_len = strlen(header);
 	memset(header + header_len, '0', 256 - header_len);
 	header[256] = '\0';
@@ -1777,6 +1794,9 @@ static bool parse_notify(struct pool *pool, json_t *val)
 		// TODO: memory leaks? goto out, clean up there?
 		return false;
 	}
+
+	if (pool->algorithm.type == ALGO_SIA)
+		 flip80(pool->header_bin, pool->header_bin);
 
 	cb1 = (unsigned char *)calloc(cb1_len, 1);
 	if (unlikely(!cb1))

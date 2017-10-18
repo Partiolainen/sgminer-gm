@@ -64,9 +64,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
 	m[1] = DEC64LE(block + 8);
 	m[2] = DEC64LE(block + 16);
 	m[3] = DEC64LE(block + 24);
-	m[4] = DEC64LE(block + 32);
-	m[4] &= 0xFFFFFFFF00000000;
-	m[4] ^= (gid);
+	m[4] = (ulong)gid;
 	m[5] = DEC64LE(block + 40);
 	m[6] = DEC64LE(block + 48);
 	m[7] = DEC64LE(block + 56);
