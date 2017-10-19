@@ -284,6 +284,7 @@
     <ClCompile Include="..\algorithm\eth-sha3.c" />
     <ClCompile Include="..\algorithm\ethash.c" />
     <ClCompile Include="..\algorithm\ethgencache.c" />
+    <ClCompile Include="..\algorithm\hsr.c" />
     <ClCompile Include="..\algorithm\lbry.c" />
     <ClCompile Include="..\algorithm\lyra2.c" />
     <ClCompile Include="..\algorithm\lyra2re.c" />
@@ -354,6 +355,7 @@
     <ClCompile Include="..\sph\simd.c" />
     <ClCompile Include="..\sph\skein.c" />
     <ClCompile Include="..\algorithm\twecoin.c" />
+    <ClCompile Include="..\sph\sm3.c" />
     <ClCompile Include="..\sph\whirlpool.c" />
     <ClCompile Include="..\sysfs-gpu-controls.c" />
     <ClCompile Include="..\util.c" />
@@ -372,6 +374,7 @@
     <ClInclude Include="..\algorithm\equihash.h" />
     <ClInclude Include="..\algorithm\eth-sha3.h" />
     <ClInclude Include="..\algorithm\ethash.h" />
+    <ClInclude Include="..\algorithm\hsr.h" />
     <ClInclude Include="..\algorithm\lbry.h" />
     <ClInclude Include="..\algorithm\lyra2.h" />
     <ClInclude Include="..\algorithm\lyra2re.h" />
@@ -438,6 +441,7 @@
     <ClInclude Include="..\sph\sph_shavite.h" />
     <ClInclude Include="..\sph\sph_simd.h" />
     <ClInclude Include="..\sph\sph_skein.h" />
+    <ClInclude Include="..\sph\sph_sm3.h" />
     <ClInclude Include="..\sph\sph_types.h" />
     <ClInclude Include="..\algorithm\twecoin.h" />
     <ClInclude Include="..\sph\sph_whirlpool.h" />
