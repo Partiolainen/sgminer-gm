@@ -287,6 +287,12 @@
     <ClCompile Include="..\algorithm\pascal.c">
       <Filter>Source Files\algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="..\algorithm\hsr.c">
+      <Filter>Source Files\algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sph\sm3.c">
+      <Filter>Source Files\sph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\adl.h">
@@ -552,6 +558,12 @@
     </ClInclude>
     <ClInclude Include="..\algorithm\pascal.h">
       <Filter>Header Files\algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\algorithm\hsr.h">
+      <Filter>Header Files\algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sph\sph_sm3.h">
+      <Filter>Header Files\sph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
