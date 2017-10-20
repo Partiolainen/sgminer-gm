@@ -7775,8 +7775,6 @@ static void rebuild_nonce(struct work *work, uint32_t nonce)
   if (work->pool->algorithm.type == ALGO_CRE)
     nonce_pos = 140;
   else if (work->pool->algorithm.type == ALGO_DECRED) nonce_pos = 140;
-  else if (work->pool->algorithm.type == ALGO_CRYPTONIGHT)
-    nonce_pos = 39;
   else if (work->pool->algorithm.type == ALGO_LBRY) 
 	nonce_pos = 108;
   else if (work->pool->algorithm.type == ALGO_SIA) nonce_pos = 32;
@@ -7785,6 +7783,11 @@ static void rebuild_nonce(struct work *work, uint32_t nonce)
   if (work->pool->algorithm.type == ALGO_ETHASH) {
     uint64_t *work_nonce = (uint64_t *)(work->data + 32);
     *work_nonce = htole32(nonce);
+  }
+  else if (work->pool->algorithm.type == ALGO_CRYPTONIGHT) {
+	  uint32_t *work_nonce = (uint32_t *)(work->data + 39);
+	  *work_nonce &= 0xFF000000;
+	  *work_nonce |= (htole32(nonce) & 0xFFFFFF);
   }
   else {
     uint32_t *work_nonce = (uint32_t *)(work->data + nonce_pos);
