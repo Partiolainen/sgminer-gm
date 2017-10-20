@@ -4394,10 +4394,9 @@ static double share_diff(const struct work *work)
   if (work->pool->algorithm.type == ALGO_ETHASH) {
     uint8_t tmp[32];
     swab256(tmp, work->hash);
-    ret = eth2pow256 / (le256todouble(tmp) + 1.);
-    uint64_t le_target = *(uint64_t*) (work->target + 24);
-    if (*(uint64_t*) (tmp + 24) > le_target)
-      return ret;
+	d64 = work->pool->algorithm.share_diff_multiplier * truediffone;
+	s64 = le256todouble(tmp);
+	ret = d64 / (s64 + 1.);
   }
   else {
     d64 = work->pool->algorithm.share_diff_multiplier * truediffone;
@@ -6032,13 +6031,13 @@ static void *stratum_sthread(void *userdata)
       uint64_t tmp = bswap_64(work->Nonce);
       char *ASCIIMixHash = bin2hex(work->mixhash, 32);
       char *ASCIIPoWHash = bin2hex(work->data, 32);
-      char *ASCIINonce = bin2hex((const unsigned char*)&tmp, 8);
+	  char *ASCIINonce = bin2hex((const unsigned char*)&tmp + pool->n1_len, pool->n2size + 4);
 
       mutex_lock(&sshare_lock);
       /* Give the stratum share a unique id */
       sshare->id = swork_id++;
       mutex_unlock(&sshare_lock);
-      snprintf(ss, s_size, "{\"id\": %d, \"method\": \"mining.submit\", \"params\": [\"%s\", \"%s\", \"0x%s\", \"0x%s\", \"0x%s\"]}", sshare->id, pool->rpc_user, work->job_id, ASCIINonce, ASCIIPoWHash, ASCIIMixHash);
+      snprintf(s, s_size, "{\"id\": %d, \"method\": \"mining.submit\", \"params\": [\"%s\", \"%s\", \"%s\"]}", sshare->id, pool->rpc_user, work->job_id, ASCIINonce);
 
       free(ASCIINonce);
       free(ASCIIMixHash);
@@ -6648,6 +6647,7 @@ void set_target_neoscrypt(unsigned char *target, double diff, const int thr_id)
 
 static void gen_stratum_work_eth(struct pool *pool, struct work *work)
 {
+	uint32_t nonce2le;
   if(pool->algorithm.type != ALGO_ETHASH)
     return;
 
@@ -6656,12 +6656,28 @@ static void gen_stratum_work_eth(struct pool *pool, struct work *work)
   cg_rlock(&pool->data_lock);
   work->eth_epoch = pool->eth_cache.current_epoch;
   work->job_id = strdup(pool->swork.job_id);
+  work->nonce1 = strdup(pool->nonce1);
+  nonce2le = htole32(pool->nonce2);
+  uint8_t *p = (uint8_t *)&nonce2le;
+  switch (pool->n1_len) {
+  case 4:
+	  p[0] = pool->nonce1bin[3];
+  case 3:
+	  p[1] = pool->nonce1bin[2];
+  case 2:
+	  p[2] = pool->nonce1bin[1];
+  case 1:
+	  p[3] = pool->nonce1bin[0];
+  }
+  work->Nonce = (uint64_t)nonce2le << 32;
+  work->nonce2 = pool->nonce2++;
+  work->nonce2_len = pool->n2size;
   memcpy(work->data, pool->EthWork, 32);
-  memcpy(work->target, pool->Target, 32);
   work->sdiff = pool->swork.diff;
   work->work_difficulty = pool->swork.diff;
   work->network_diff = pool->diff1;
   cg_runlock(&pool->data_lock);
+  set_target(work->target, work->sdiff, pool->algorithm.diff_multiplier2, work->thr_id);
 
   local_work++;
   work->pool = pool;
@@ -7983,12 +7999,6 @@ static void hash_sole_work(struct thr_info *mythr)
 
     if (work->pool->algorithm.type == ALGO_NEOSCRYPT)
       set_target_neoscrypt(work->device_target, work->device_diff, work->thr_id);
-    else if (work->pool->algorithm.type == ALGO_ETHASH) {
-      double mult = 60e6;
-      work->device_diff = MIN(work->work_difficulty, mult);
-      *(uint64_t*) (work->device_target + 24) = bits64 / work->device_diff;
-      work->device_diff /= mult;
-    }
     else if (work->pool->algorithm.type != ALGO_EQUIHASH)
       set_target(work->device_target, work->device_diff, work->pool->algorithm.diff_multiplier2, work->thr_id);
 
@@ -9426,16 +9436,13 @@ int main(int argc, char *argv[])
     initial_args[i] = (const char *)strdup(argv[i]);
   initial_args[argc] = NULL;
 
-  mutex_init(&eth_nonce_lock);
 #ifdef WIN32
-  rand_s(&eth_nonce);
   for (int i = 0; i < sizeof(entropy); i += 4)
     rand_s((uint32_t*)(entropy + i));
 #else
   int fd = open("/dev/urandom", O_RDONLY);
   if (fd < 0)
     fd = open("/dev/random", O_RDONLY);
-  read(fd, &eth_nonce, 4);
   read(fd, entropy, sizeof(entropy));
   close(fd);
 #endif
