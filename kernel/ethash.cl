@@ -1,6 +1,6 @@
 #define MAX_OUTPUTS 0xFFu
 #if !(defined WINDOWS) || (defined __Tahiti__)
-#define barrier(x) mem_fence(x)
+//#define barrier(x) mem_fence(x)
 #endif
 
 #if WORKSIZE % 4 != 0
