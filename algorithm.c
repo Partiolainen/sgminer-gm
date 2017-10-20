@@ -149,6 +149,9 @@ static void append_scrypt_compiler_options(struct _build_kernel_data *data, stru
 
 static void append_ethash_compiler_options(struct _build_kernel_data *data, struct cgpu_info *cgpu, struct _algorithm_t *algorithm)
 {
+#ifdef WIN32
+	strcat(data->compiler_options, "-DWINDOWS");
+#endif
 }
 
 static void append_neoscrypt_compiler_options(struct _build_kernel_data *data, struct cgpu_info *cgpu, struct _algorithm_t *algorithm)
